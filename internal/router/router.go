@@ -29,6 +29,7 @@ func InitRouter(r *gin.Engine) {
 	registerVersionRouter(version,
 		NewParamsRouter(), // 参数配置
 		NewJobRouter(),    // 定时任务
+		NewRepoRouter(),   // 代码仓库
 	)
 }
 

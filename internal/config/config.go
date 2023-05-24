@@ -177,6 +177,6 @@ func initConfig() {
 		&Param{},
 		&model.Task{},
 		&model.User{},
-		&model.Monitor{},
+		&model.Repository{},
 	)
 }
