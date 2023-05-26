@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/pkg/utils"
@@ -27,6 +28,7 @@ func (r *Repo) Create(data *model.CreateRepository) error {
 	repo.ID = strconv.FormatInt(utils.GenID(), 10)
 	repo.Name = data.Name
 	repo.Path = data.Path
+	repo.CreateTime = time.Now().Format("2006-01-02 15:04:05.999")
 	return r.Db.Create(repo).Error
 }
 
