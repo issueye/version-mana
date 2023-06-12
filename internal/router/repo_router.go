@@ -23,7 +23,4 @@ func (repo RepoRouter) Register(group *gin.RouterGroup) {
 	f.POST("", repo.control.Create)
 	f.PUT("", repo.control.Modify)
 	f.DELETE("/:id", repo.control.Delete)
-	f.GET("clone/:id", repo.control.Clone)
-	f.GET("open/:id", repo.control.Open)
-	f.GET("branch/:id", repo.control.BranchList)
 }

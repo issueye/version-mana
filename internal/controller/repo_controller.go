@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/issueye/version-mana/internal/global"
-	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
 )
@@ -16,52 +15,6 @@ type RepoController struct {
 
 func NewRepoController() *RepoController {
 	return new(RepoController)
-}
-
-func (RepoController) Clone(ctx *gin.Context) {
-	control := New(ctx)
-
-	id := control.Param("id")
-	if id == "" {
-		control.FailBind(errors.New("[id]不能为空"))
-		return
-	}
-
-	logic.RepoClone(id)
-
-	control.Success()
-}
-
-func (RepoController) Open(ctx *gin.Context) {
-	control := New(ctx)
-
-	id := control.Param("id")
-	if id == "" {
-		control.FailBind(errors.New("[id]不能为空"))
-		return
-	}
-
-	logic.RepoOpen(id)
-
-	control.Success()
-}
-
-func (RepoController) BranchList(ctx *gin.Context) {
-	control := New(ctx)
-
-	id := control.Param("id")
-	if id == "" {
-		control.FailBind(errors.New("[id]不能为空"))
-		return
-	}
-
-	b, err := logic.GetBranchList(id)
-	if err != nil {
-		control.FailByMsgf("获取分支列表失败，失败原因：%s", err.Error())
-		return
-	}
-
-	control.SuccessData(b)
 }
 
 // 创建一个代码仓库信息

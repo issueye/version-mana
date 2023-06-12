@@ -26,9 +26,10 @@ func NewRepo(db *gorm.DB) *Repo {
 func (r *Repo) Create(data *model.CreateRepository) error {
 	repo := new(model.Repository)
 	repo.ID = strconv.FormatInt(utils.GenID(), 10)
-	repo.Name = data.Name
+	repo.ProjectName = data.ProjectName
+	repo.ServerName = data.ServerName
 	repo.Path = data.Path
-	repo.CreateTime = time.Now().Format("2006-01-02 15:04:05.999")
+	repo.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
 	return r.Db.Create(repo).Error
 }
 
@@ -36,7 +37,8 @@ func (r *Repo) Create(data *model.CreateRepository) error {
 func (r *Repo) Modify(data *model.ModifyRepository) error {
 	repo := new(model.Repository)
 	repo.ID = data.ID
-	repo.Name = data.Name
+	repo.ProjectName = data.ProjectName
+	repo.ServerName = data.ServerName
 	repo.Path = data.Path
 	return r.Db.Model(repo).Where("id = ?", repo.ID).Updates(repo).Error
 }

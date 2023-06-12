@@ -25,7 +25,7 @@ func InitRouter(r *gin.Engine) {
 	version.GET("refreshToken", global.Auth.RefreshHandler)
 
 	// 鉴权
-	version.Use(global.Auth.MiddlewareFunc())
+	// version.Use(global.Auth.MiddlewareFunc())
 	registerVersionRouter(version,
 		NewParamsRouter(), // 参数配置
 		NewJobRouter(),    // 定时任务
