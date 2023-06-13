@@ -5,6 +5,7 @@ type Repository struct {
 	ProjectName string `gorm:"column:project_name;type:nvarchar(100);" json:"project_name"` // 名称
 	ServerName  string `gorm:"column:server_name;type:nvarchar(100);" json:"server_name"`   // 名称
 	RepoUrl     string `gorm:"column:repo_url;type:nvarchar(400);" json:"repo_url"`         // 代码仓库路径
+	Code        string `gorm:"column:code;type:nvarchar(8000);" json:"code"`                // 代码
 	CreateAt    string `gorm:"column:create_at;type:nvarchar(100);" json:"create_at"`       // 创建时间
 }
 
@@ -15,6 +16,7 @@ func (Repository) TableName() string {
 type CreateRepository struct {
 	ProjectName string `json:"project_name" binding:"required" label:"项目名称"` // 项目名称
 	ServerName  string `json:"server_name" binding:"required" label:"项目名称"`  // 服务名称
+	Code        string `json:"code" binding:"required" label:"代码"`           // 代码
 	RepoUrl     string `json:"repo_url" binding:"required" label:"代码仓库路径"`   // 代码仓库路径
 }
 
@@ -22,6 +24,7 @@ type ModifyRepository struct {
 	ID          string `json:"id" binding:"required" label:"编码"`             // 编码
 	ProjectName string `json:"project_name" binding:"required" label:"项目名称"` // 项目名称
 	ServerName  string `json:"server_name" binding:"required" label:"项目名称"`  // 服务名称
+	Code        string `json:"code" binding:"required" label:"代码"`           // 代码
 	RepoUrl     string `json:"repo_url" binding:"required" label:"代码仓库路径"`   // 代码仓库路径
 }
 

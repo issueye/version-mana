@@ -25,10 +25,12 @@ func NewRepo(db *gorm.DB) *Repo {
 // 创建一个代码仓库信息
 func (r *Repo) Create(data *model.CreateRepository) error {
 	repo := new(model.Repository)
-	repo.ID = strconv.FormatInt(utils.GenID(), 10)
+	idStr := strconv.FormatInt(utils.GenID(), 10)
+	repo.ID = utils.Sha1(idStr)
 	repo.ProjectName = data.ProjectName
 	repo.ServerName = data.ServerName
 	repo.RepoUrl = data.RepoUrl
+	repo.Code = data.Code
 	repo.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
 	return r.Db.Create(repo).Error
 }
@@ -40,6 +42,7 @@ func (r *Repo) Modify(data *model.ModifyRepository) error {
 	repo.ProjectName = data.ProjectName
 	repo.ServerName = data.ServerName
 	repo.RepoUrl = data.RepoUrl
+	repo.Code = data.Code
 	return r.Db.Model(repo).Where("id = ?", repo.ID).Updates(repo).Error
 }
 
