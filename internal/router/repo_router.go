@@ -17,10 +17,23 @@ func NewRepoRouter() *RepoRouter {
 	}
 }
 
-func (repo RepoRouter) Register(group *gin.RouterGroup) {
-	f := group.Group(repo.Name)
-	f.GET("", repo.control.List)
-	f.POST("", repo.control.Create)
-	f.PUT("", repo.control.Modify)
-	f.DELETE("/:id", repo.control.Delete)
+func (r RepoRouter) Register(group *gin.RouterGroup) {
+	control := controller.NewRepoController()
+
+	// 仓库管理
+	repo := group.Group(r.Name)
+	{
+		repo.GET("", control.List)
+		repo.POST("", control.Create)
+		repo.PUT("", control.Modify)
+		repo.DELETE("/:id", control.Delete)
+	}
+
+	// 版本管理
+	version := repo.Group("version")
+	{
+		version.DELETE("/:id", control.RemoveVersion) // 移除版本
+		version.POST("", control.CreateVersion)       // 创建版本
+		version.GET("", control.GetVersionList)       // 获取版本列表
+	}
 }

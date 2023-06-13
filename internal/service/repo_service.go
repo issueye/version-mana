@@ -28,7 +28,7 @@ func (r *Repo) Create(data *model.CreateRepository) error {
 	repo.ID = strconv.FormatInt(utils.GenID(), 10)
 	repo.ProjectName = data.ProjectName
 	repo.ServerName = data.ServerName
-	repo.Path = data.Path
+	repo.RepoUrl = data.RepoUrl
 	repo.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
 	return r.Db.Create(repo).Error
 }
@@ -39,7 +39,7 @@ func (r *Repo) Modify(data *model.ModifyRepository) error {
 	repo.ID = data.ID
 	repo.ProjectName = data.ProjectName
 	repo.ServerName = data.ServerName
-	repo.Path = data.Path
+	repo.RepoUrl = data.RepoUrl
 	return r.Db.Model(repo).Where("id = ?", repo.ID).Updates(repo).Error
 }
 
@@ -69,4 +69,85 @@ func (r *Repo) Query(req *model.QueryRepository) ([]*model.Repository, error) {
 // 根据 id 删除
 func (r *Repo) DelById(id string) error {
 	return r.Db.Where("id = ?", id).Delete(&model.Repository{}).Error
+}
+
+/****************************************AppVersion*******************************************/
+
+// 根据id 查询
+func (r *Repo) GetVersionById(id string) (*model.AppVersionInfo, error) {
+	data := new(model.AppVersionInfo)
+	err := r.Db.Model(data).Where("id = ?", id).Find(data).Error
+	return data, err
+}
+
+// 根据分支名称 查询
+func (r *Repo) GetVersionByBranch(branch string) ([]*model.AppVersionInfo, error) {
+	data := make([]*model.AppVersionInfo, 0)
+	err := r.Db.Model(data).Where("branch = ?", branch).Find(data).Error
+	return data, err
+}
+
+// 根据分支名称 查询
+func (r *Repo) GetVersionByBranchAndNum(branch string, num string) (*model.AppVersionInfo, error) {
+	data := new(model.AppVersionInfo)
+	err := r.Db.
+		Model(data).
+		Where("branch = ?", branch).
+		Where("version = ?", num).
+		Find(data).
+		Error
+
+	return data, err
+}
+
+// 根据 id 删除
+func (r *Repo) DelVersionById(id string) error {
+	return r.Db.Where("id = ?", id).Delete(&model.AppVersionInfo{}).Error
+}
+
+// 添加版本
+func (r *Repo) CreateVersion(data *model.CreateVersion) error {
+	info := new(model.AppVersionInfo)
+	info.AppName = data.AppName
+	info.Tag = data.Tag
+	info.Branch = data.Branch
+	info.CommitHash = data.CommitHash
+	info.Content = data.Content
+	info.RepoID = data.RepoID
+	info.Version = data.Version
+	info.VersionX = data.VersionX
+	info.VersionY = data.VersionY
+	info.VersionZ = data.VersionZ
+	info.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
+
+	// 生成一个ID
+	id := utils.GenID()
+	idStr := strconv.FormatInt(id, 10)
+	info.ID = utils.Sha1(idStr)
+
+	return r.Db.Create(info).Error
+}
+
+// 获取列表
+func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, error) {
+	list := make([]*model.AppVersionInfo, 0)
+
+	err := r.DataFilter(model.AppVersionInfo{}.TableName(), req, &list, func(db *gorm.DB) (*gorm.DB, error) {
+		query := db.Order("id")
+
+		if req.Tag != "" {
+			query = query.Where("tag = ?", req.Tag)
+		}
+
+		if req.Condition != "" {
+			query = query.Where("app_name like ?", fmt.Sprintf("%%%s%%", req.Condition))
+			query = query.Where("version like ?", fmt.Sprintf("%%%s%%", req.Condition))
+			query = query.Where("content like ?", fmt.Sprintf("%%%s%%", req.Condition))
+			query = query.Where("branch like ?", fmt.Sprintf("%%%s%%", req.Condition))
+		}
+
+		return query, nil
+	})
+
+	return list, err
 }

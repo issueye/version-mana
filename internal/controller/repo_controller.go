@@ -2,9 +2,11 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/issueye/version-mana/internal/global"
+	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
 )
@@ -110,4 +112,68 @@ func (RepoController) Delete(ctx *gin.Context) {
 	}
 
 	control.Success()
+}
+
+// 删除代码仓库信息
+func (RepoController) RemoveVersion(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	// 移除版本
+	err := logic.NewRepo().RemoveVersion(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.Success()
+}
+
+// 创建版本信息
+func (RepoController) CreateVersion(ctx *gin.Context) {
+	control := New(ctx)
+
+	// 绑定参数
+	req := new(model.CreateVersion)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	err = logic.NewRepo().CreateVersion(req)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.Success()
+}
+
+// 获取版本列表
+func (RepoController) GetVersionList(ctx *gin.Context) {
+	control := New(ctx)
+
+	// 绑定参数
+	req := new(model.QueryVersion)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	fmt.Println("req", req)
+
+	list, err := logic.NewRepo().GetVersionList(req)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.SuccessAutoData(req, list)
 }

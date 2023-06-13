@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"strings"
 
 	"go.uber.org/zap"
@@ -28,6 +29,8 @@ func (w Writer) Printf(format string, args ...interface{}) {
 	if !w.BPrint {
 		return
 	}
+
+	fmt.Printf(format, args...)
 
 	switch len(args) {
 	case 3:
