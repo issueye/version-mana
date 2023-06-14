@@ -2,15 +2,23 @@ package gogit
 
 import (
 	"os"
+	"sync"
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/issueye/version-mana/pkg/utils"
 )
+
+var RepoMap = new(sync.Map)
 
 // RepoClone
 // 从仓库地址拷贝指定分支到本地指定路径
 func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
+	value, ok := RepoMap.Load(path)
+	if ok {
+		return value.(*git.Repository), nil
+	}
 
 	// 判断本地是否存在指定的文件夹
 	exist, err := utils.PathExists(path)
@@ -30,6 +38,9 @@ func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
 	option := &git.CloneOptions{
 		URL:               url,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+		ProxyOptions: transport.ProxyOptions{
+			URL: "http://127.0.0.1:1080",
+		},
 	}
 
 	// 判断是否需要指定分支
@@ -39,7 +50,14 @@ func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
 	}
 
 	// 克隆代码
-	return git.PlainClone(path, false, option)
+	r, err := git.PlainClone(path, false, option)
+	if err != nil {
+		return nil, err
+	}
+
+	// 将对象 存入map中
+	RepoMap.Store(path, r)
+	return r, nil
 }
 
 // 分支信息

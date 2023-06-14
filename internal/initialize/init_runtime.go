@@ -18,6 +18,7 @@ func InitRuntime() {
 	rtPath := isExistsCreatePath(path, "runtime")
 	isExistsCreatePath(rtPath, "data")
 	isExistsCreatePath(rtPath, "logs")
+	isExistsCreatePath(rtPath, "git_repo")
 	staticPath := isExistsCreatePath(rtPath, "static")
 	isExistsCreatePath(staticPath, "admin")
 }

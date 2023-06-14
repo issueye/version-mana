@@ -3,8 +3,10 @@ package logic
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/issueye/version-mana/internal/global"
+	"github.com/issueye/version-mana/internal/gogit"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
 )
@@ -68,4 +70,26 @@ func (RepoLogic) RemoveVersion(id string) error {
 	}
 
 	return service.NewRepo(global.DB).DelVersionById(id)
+}
+
+func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
+
+	// 查询仓库的地址
+	repo, err := service.NewRepo(global.DB).GetById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if repo.ID == "" {
+		return nil, errors.New("未查询到仓库信息")
+	}
+
+	s := filepath.Join("runtime", "git_repo", repo.ServerName, "temp")
+	fmt.Println("path", s)
+	r, err := gogit.RepoClone(s, repo.RepoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return gogit.GetBranchList(r)
 }

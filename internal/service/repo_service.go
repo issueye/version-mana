@@ -121,6 +121,17 @@ func (r *Repo) CreateVersion(data *model.CreateVersion) error {
 	info.VersionX = data.VersionX
 	info.VersionY = data.VersionY
 	info.VersionZ = data.VersionZ
+
+	// 生成一个内部的可排序的版号   101001
+	version_y := utils.StrPad(strconv.FormatInt(data.VersionY, 10), 2, "0", "LEFT")
+	version_z := utils.StrPad(strconv.FormatInt(data.VersionZ, 10), 3, "0", "LEFT")
+	iv := strconv.FormatInt(data.VersionX, 10) + version_y + version_z
+	i, err := strconv.ParseInt(iv, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	info.InternalVersion = i
 	info.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
 
 	// 生成一个ID
@@ -153,4 +164,25 @@ func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, er
 	})
 
 	return list, err
+}
+
+func (r *Repo) GetLastVerNum(repoId string, req *model.QryLastVer) (*model.AppVersionInfo, error) {
+	data := new(model.AppVersionInfo)
+
+	q := r.Db.
+		Model(data).
+		Where("repo_id = ?", repoId).
+		Where("branch = ?", req.Branch).
+		Where("tag = ?", req.Tag).
+		Find(data).Order("internal_version desc")
+
+	// sqlStr := q.ToSQL(func(tx *gorm.DB) *gorm.DB {
+	// 	return tx.Find(data)
+	// })
+
+	// fmt.Println("sqlStr", sqlStr)
+
+	err := q.Find(data).Error
+
+	return data, err
 }

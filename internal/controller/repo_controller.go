@@ -114,6 +114,51 @@ func (RepoController) Delete(ctx *gin.Context) {
 	control.Success()
 }
 
+// 获取分支列表
+func (RepoController) BranchList(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	list, err := logic.NewRepo().BranchList(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.SuccessData(list)
+}
+
+// 获取分支的发布类型的最大版号
+func (RepoController) GetLastVerNum(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("repoId")
+	if id == "" {
+		control.FailBind(errors.New("[repoId]不能为空"))
+		return
+	}
+
+	req := new(model.QryLastVer)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	data, err := service.NewRepo(global.DB).GetLastVerNum(id, req)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.SuccessData(data)
+}
+
 // 删除代码仓库信息
 func (RepoController) RemoveVersion(ctx *gin.Context) {
 	control := New(ctx)

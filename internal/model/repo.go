@@ -35,18 +35,19 @@ type QueryRepository struct {
 }
 
 type AppVersionInfo struct {
-	ID         string `gorm:"column:id;primaryKey;type:nvarchar(100);comment:编码;" json:"id"`                  // 编码
-	RepoID     string `gorm:"column:repo_id;type:nvarchar(100);comment:仓库ID;" json:"repo_id"`                 // 仓库ID
-	AppName    string `gorm:"column:app_name;type:nvarchar(100);comment:程序名称;" json:"app_name"`               // 程序名称 YHLineServer_v2.10.3.20230613_beta
-	Tag        string `gorm:"column:tag;type:nvarchar(50);comment:tag;" json:"tag"`                           // tag	 beta
-	Version    string `gorm:"column:version;type:nvarchar(100);comment:版本;" json:"version"`                   // 版本    v2.10.3.20230613
-	VersionX   int64  `gorm:"column:version_x;type:int;comment:主版本;" json:"version_x"`                        // 版本 主版本
-	VersionY   int64  `gorm:"column:version_y;type:int;comment:功能版本;" json:"version_y"`                       // 版本 功能版本
-	VersionZ   int64  `gorm:"column:version_z;type:int;comment:迭代BUG版本;" json:"version_z"`                    // 版本 迭代BUG版本
-	CreateAt   string `gorm:"column:create_at;type:nvarchar(100);comment:创建时间;" json:"create_at"`             // 创建时间
-	Branch     string `gorm:"column:branch;type:nvarchar(200);comment:分支名称;" json:"branch"`                   // 分支
-	CommitHash string `gorm:"column:commit_hash;type:nvarchar(200);comment:提交的最后一次 hash;" json:"commit_hash"` // 提交的最后一次 hash
-	Content    string `gorm:"column:content;type:nvarchar(2000);comment:更新内容;" json:"content"`                // 更新内容
+	ID              string `gorm:"column:id;primaryKey;type:nvarchar(100);comment:编码;" json:"id"`                  // 编码
+	RepoID          string `gorm:"column:repo_id;type:nvarchar(100);comment:仓库ID;" json:"repo_id"`                 // 仓库ID
+	AppName         string `gorm:"column:app_name;type:nvarchar(100);comment:程序名称;" json:"app_name"`               // 程序名称 YHLineServer_v2.10.3.20230613_beta
+	Tag             string `gorm:"column:tag;type:nvarchar(50);comment:tag;" json:"tag"`                           // tag	 beta
+	Version         string `gorm:"column:version;type:nvarchar(100);comment:版本;" json:"version"`                   // 版本    v2.10.3.20230613
+	InternalVersion int64  `gorm:"column:internal_version;type:bigint;comment:内部版号;" json:"internal_version"`      // 内部版号
+	VersionX        int64  `gorm:"column:version_x;type:int;comment:主版本;" json:"version_x"`                        // 版本 主版本
+	VersionY        int64  `gorm:"column:version_y;type:int;comment:功能版本;" json:"version_y"`                       // 版本 功能版本
+	VersionZ        int64  `gorm:"column:version_z;type:int;comment:迭代BUG版本;" json:"version_z"`                    // 版本 迭代BUG版本
+	CreateAt        string `gorm:"column:create_at;type:nvarchar(100);comment:创建时间;" json:"create_at"`             // 创建时间
+	Branch          string `gorm:"column:branch;type:nvarchar(200);comment:分支名称;" json:"branch"`                   // 分支
+	CommitHash      string `gorm:"column:commit_hash;type:nvarchar(200);comment:提交的最后一次 hash;" json:"commit_hash"` // 提交的最后一次 hash
+	Content         string `gorm:"column:content;type:nvarchar(2000);comment:更新内容;" json:"content"`                // 更新内容
 }
 
 func (AppVersionInfo) TableName() string {
@@ -71,4 +72,10 @@ type QueryVersion struct {
 	Condition string `json:"condition" form:"condition"` // 条件
 	Tag       string `json:"tag" form:"tag"`             // tag
 	Page
+}
+
+// 获取最后版本
+type QryLastVer struct {
+	Branch string `json:"branch" form:"branch" binding:"required" label:"分支名称"` // 分支
+	Tag    string `json:"tag" form:"tag" binding:"required" label:"发布类型"`       // 发布类型
 }
