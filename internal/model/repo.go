@@ -59,7 +59,7 @@ type CreateVersion struct {
 	AppName    string `json:"app_name" binding:"required" label:"程序名称"`      // 程序名称 YHLineServer_v2.10.3.20230613_beta
 	Tag        string `json:"tag" binding:"required" label:"tag"`            // tag	 beta
 	Version    string `json:"version" binding:"required" label:"版本"`         // 版本    v2.10.3.20230613
-	VersionX   int64  `json:"version_x" binding:"required" label:"主版本号"`     // 版本 主版本
+	VersionX   int64  `json:"version_x" label:"主版本号"`                        // 版本 主版本
 	VersionY   int64  `json:"version_y" binding:"required" label:"功能版本号"`    // 版本 功能版本
 	VersionZ   int64  `json:"version_z" binding:"required" label:"迭代版本号"`    // 版本 迭代BUG版本
 	Branch     string `json:"branch" binding:"required" label:"分支名称"`        // 分支
@@ -71,6 +71,7 @@ type CreateVersion struct {
 type QueryVersion struct {
 	Condition string `json:"condition" form:"condition"` // 条件
 	Tag       string `json:"tag" form:"tag"`             // tag
+	Branch    string `json:"branch" form:"branch"`       // tag
 	Page
 }
 
@@ -78,4 +79,9 @@ type QueryVersion struct {
 type QryLastVer struct {
 	Branch string `json:"branch" form:"branch" binding:"required" label:"分支名称"` // 分支
 	Tag    string `json:"tag" form:"tag" binding:"required" label:"发布类型"`       // 发布类型
+}
+
+type RepoCode struct {
+	ID   string `json:"id" binding:"required" label:"编码"`   // 编码
+	Code string `json:"code" binding:"required" label:"代码"` // 代码
 }

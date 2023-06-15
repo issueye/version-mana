@@ -39,7 +39,7 @@ func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
 		URL:               url,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 		ProxyOptions: transport.ProxyOptions{
-			URL: "http://127.0.0.1:1080",
+			URL: "http://127.0.0.1:7890",
 		},
 	}
 

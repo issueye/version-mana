@@ -5,6 +5,7 @@ import (
 
 	"github.com/dimiro1/banner"
 	"github.com/issueye/version-mana/internal/global"
+	"github.com/issueye/version-mana/internal/gojs"
 	"github.com/mattn/go-colorable"
 )
 
@@ -21,6 +22,8 @@ func Initialize() {
 	InitServer()
 	// 启动服务
 	ShowInfo()
+	// 初始化JS
+	gojs.InitGojs()
 	// 监听服务
 	_ = global.HttpServer.ListenAndServe()
 }

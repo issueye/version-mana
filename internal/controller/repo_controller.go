@@ -2,10 +2,10 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/issueye/version-mana/internal/global"
+	"github.com/issueye/version-mana/internal/gojs"
 	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
@@ -179,6 +179,54 @@ func (RepoController) RemoveVersion(ctx *gin.Context) {
 	control.Success()
 }
 
+// 删除代码仓库信息
+func (RepoController) ModifyCode(ctx *gin.Context) {
+	control := New(ctx)
+
+	req := new(model.RepoCode)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	err = service.NewRepo(global.DB).ModifyCode(req)
+	if err != nil {
+		control.FailByMsgf("修改代码失败，失败原因：%s", err.Error())
+		return
+	}
+
+	control.Success()
+}
+
+// 删除代码仓库信息
+func (RepoController) TestRun(ctx *gin.Context) {
+	control := New(ctx)
+
+	req := new(model.RepoCode)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	gojs.RunCode <- req
+	control.Success()
+}
+
+// 删除代码仓库信息
+func (RepoController) Build(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+	gojs.VersId <- id
+	control.Success()
+}
+
 // 创建版本信息
 func (RepoController) CreateVersion(ctx *gin.Context) {
 	control := New(ctx)
@@ -211,8 +259,6 @@ func (RepoController) GetVersionList(ctx *gin.Context) {
 		control.FailBind(err)
 		return
 	}
-
-	fmt.Println("req", req)
 
 	list, err := logic.NewRepo().GetVersionList(req)
 	if err != nil {

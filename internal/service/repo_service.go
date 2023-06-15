@@ -46,6 +46,11 @@ func (r *Repo) Modify(data *model.ModifyRepository) error {
 	return r.Db.Model(repo).Where("id = ?", repo.ID).Updates(repo).Error
 }
 
+// 修改代码仓库信息
+func (r *Repo) ModifyCode(data *model.RepoCode) error {
+	return r.Db.Model(&model.Repository{}).Where("id = ?", data.ID).Update("code", data.Code).Error
+}
+
 // 根据id 查询
 func (r *Repo) GetById(id string) (*model.Repository, error) {
 	data := new(model.Repository)
@@ -147,17 +152,20 @@ func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, er
 	list := make([]*model.AppVersionInfo, 0)
 
 	err := r.DataFilter(model.AppVersionInfo{}.TableName(), req, &list, func(db *gorm.DB) (*gorm.DB, error) {
-		query := db.Order("id")
+		query := db.Order("internal_version desc")
 
 		if req.Tag != "" {
 			query = query.Where("tag = ?", req.Tag)
+		}
+
+		if req.Branch != "" {
+			query = query.Where("branch = ?", req.Branch)
 		}
 
 		if req.Condition != "" {
 			query = query.Where("app_name like ?", fmt.Sprintf("%%%s%%", req.Condition))
 			query = query.Where("version like ?", fmt.Sprintf("%%%s%%", req.Condition))
 			query = query.Where("content like ?", fmt.Sprintf("%%%s%%", req.Condition))
-			query = query.Where("branch like ?", fmt.Sprintf("%%%s%%", req.Condition))
 		}
 
 		return query, nil
@@ -168,20 +176,15 @@ func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, er
 
 func (r *Repo) GetLastVerNum(repoId string, req *model.QryLastVer) (*model.AppVersionInfo, error) {
 	data := new(model.AppVersionInfo)
+	// q := r.Db.
+	// 	Model(data).
+	// Where("repo_id = ?", repoId).
+	// Where("branch = ?", req.Branch).
+	// Where("tag = ?", req.Tag).
+	// 	Find(data).Order("internal_version desc")
 
-	q := r.Db.
-		Model(data).
-		Where("repo_id = ?", repoId).
-		Where("branch = ?", req.Branch).
-		Where("tag = ?", req.Tag).
-		Find(data).Order("internal_version desc")
-
-	// sqlStr := q.ToSQL(func(tx *gorm.DB) *gorm.DB {
-	// 	return tx.Find(data)
-	// })
-
-	// fmt.Println("sqlStr", sqlStr)
-
+	sqlStr := `select * from app_version_info where repo_id = ? and branch = ? and tag = ? order by internal_version desc `
+	q := r.Db.Raw(sqlStr, repoId, req.Branch, req.Tag)
 	err := q.Find(data).Error
 
 	return data, err
