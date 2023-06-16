@@ -38,34 +38,33 @@ func gojs() {
 }
 
 func runCompileScript(id string, args ...any) {
-	// 获取id信息
-	info, err := service.NewRepo(global.DB).GetVersionById(id)
-	if err != nil {
-		return
-	}
-
-	// 获取仓库信息
-	r, err := service.NewRepo(global.DB).GetById(info.RepoID)
-	if err != nil {
-		return
-	}
 
 	c := licheeJs.NewCore()
 	c.SetLogOutMode(licheeJs.LOM_DEBUG)
 	workDir := utils.GetWorkDir()
-	repoDir := filepath.Join(workDir, "runtime", "git_repo", r.ServerName, info.AppName)
-	workDir = filepath.Join(workDir, "runtime", "logs")
-	c.SetLogPath(workDir)
+	logDir := filepath.Join(workDir, "runtime", "logs")
+	c.SetLogPath(logDir)
 
-	// 添加 js 变量
-	c.SetGlobalProperty("repo_info", r)
-	c.SetGlobalProperty("workDir", repoDir)
+	// 如果是测试运行，则之传入仓库信息
+	var (
+		code string
+		err  error
+	)
 
-	code := r.Code
 	if len(args) > 0 {
+		_, err = injectRepoInfo(id, workDir, c)
+		if err != nil {
+			sendMessage(id, err.Error())
+			return
+		}
+
 		code = args[0].(string)
 	} else {
-		c.SetGlobalProperty("version_info", info)
+		code, err = injectVersionInfo(id, workDir, c)
+		if err != nil {
+			sendMessage(id, err.Error())
+			return
+		}
 	}
 
 	// 注册模块
@@ -74,8 +73,59 @@ func runCompileScript(id string, args ...any) {
 	err = c.RunString("test", code)
 	if err != nil {
 		fmt.Println("运行错误，错误原因：", err.Error())
+		sendMessage(id, err.Error())
 		return
 	}
+}
+
+func sendMessage(id, msg string) {
+	value, ok := ws.SMap.Load(id)
+	if ok {
+		wc := value.(*ws.WsConn)
+		err := wc.OutChanWrite([]byte(msg))
+		if err != nil {
+			global.Log.Errorf("传送输出信息失败，失败原因：%s", err.Error())
+			return
+		}
+	}
+}
+
+// 注入仓库信息
+func injectRepoInfo(id string, workDir string, c *licheeJs.Core) (string, error) {
+	// 获取仓库信息
+	r, err := service.NewRepo(global.DB).GetById(id)
+	if err != nil {
+		return "", err
+	}
+
+	repoDir := filepath.Join(workDir, "runtime", "git_repo", r.ServerName, "temp")
+	c.SetGlobalProperty("repoInfo", r)
+	c.SetGlobalProperty("workDir", repoDir)
+
+	return r.Code, nil
+}
+
+func injectVersionInfo(id string, workDir string, c *licheeJs.Core) (string, error) {
+	// 获取版本信息
+	version, err := service.NewRepo(global.DB).GetVersionById(id)
+	if err != nil {
+		return "", err
+	}
+
+	// 注入仓库信息
+	r, err := service.NewRepo(global.DB).GetById(id)
+	if err != nil {
+		return "", err
+	}
+
+	// 获取当前仓库版本的工作区
+	repoDir := filepath.Join(workDir, "runtime", "git_repo", r.ServerName, version.AppName)
+
+	c.SetGlobalProperty("versionInfo", version)
+	c.SetGlobalProperty("repoInfo", r)
+	c.SetGlobalProperty("workDir", repoDir)
+
+	return r.Code, nil
 }
 
 func InitVm(c *licheeJs.Core, id string) {
@@ -96,17 +146,8 @@ func InitVm(c *licheeJs.Core, id string) {
 	// 回调
 	c.ConsoleCallBack = func(args ...any) {
 		if len(args) > 0 {
-			fmt.Println("id", id)
-			value, ok := ws.SMap.Load(id)
-			if ok {
-				wc := value.(*ws.WsConn)
-				data := args[0].(string)
-				err := wc.OutChanWrite([]byte(data))
-				if err != nil {
-					global.Log.Errorf("传送输出信息失败，失败原因：%s", err.Error())
-					return
-				}
-			}
+			data := args[0].(string)
+			sendMessage(id, data)
 		}
 	}
 

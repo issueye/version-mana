@@ -6,7 +6,6 @@ import (
 
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/issueye/version-mana/pkg/utils"
 )
 
@@ -38,9 +37,9 @@ func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
 	option := &git.CloneOptions{
 		URL:               url,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-		ProxyOptions: transport.ProxyOptions{
-			URL: "http://127.0.0.1:7890",
-		},
+		// ProxyOptions: transport.ProxyOptions{
+		// 	URL: "http://127.0.0.1:7890",
+		// },
 	}
 
 	// 判断是否需要指定分支

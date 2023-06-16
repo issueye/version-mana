@@ -86,7 +86,7 @@ func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
 
 	s := filepath.Join("runtime", "git_repo", repo.ServerName, "temp")
 	fmt.Println("path", s)
-	r, err := gogit.RepoClone(s, repo.RepoUrl)
+	r, err := gogit.RepoClone(s, repo.RepoUrl, "PDJH-V2.1-DEV-001")
 	if err != nil {
 		return nil, err
 	}

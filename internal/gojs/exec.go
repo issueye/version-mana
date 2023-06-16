@@ -2,11 +2,12 @@ package gojs
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
+	"time"
 
 	"github.com/dop251/goja"
 )
@@ -59,10 +60,40 @@ func (e *Exec) GetEnv(k string) string {
 	return ""
 }
 
-func (e *Exec) Run(code string, cb CallBack) error {
-	ctx := context.Background()
-	args := strings.Split(code, " ")
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+func (e *Exec) Run(name string, args []string, cb CallBack) error {
+	cmd := exec.Command(name, args...)
+
+	// 设置工作区
+	if e.workDir != "" {
+		cmd.Dir = e.workDir
+	}
+
+	// 设置环境变量
+	cmd.Env = []string{}
+	for k, v := range e.envs {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("run %s: %s", err.Error(), stderr.String())
+	}
+
+	return nil
+}
+
+func (e *Exec) RunWait(name string, args []string, seconds int, cb CallBack) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(seconds))
+	defer cancel()
+	// args := strings.Split(code, " ")
+	// cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	fmt.Println("RunWait", args)
+	cmd := exec.CommandContext(ctx, name, args...)
 
 	// 设置工作区
 	if e.workDir != "" {
@@ -78,13 +109,12 @@ func (e *Exec) Run(code string, cb CallBack) error {
 	// 运行
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("stdoutPipe %s", err.Error())
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return err
+		return fmt.Errorf("start %s", err.Error())
 	}
 
 	in := bufio.NewScanner(stdout)
@@ -94,7 +124,7 @@ func (e *Exec) Run(code string, cb CallBack) error {
 
 	err = cmd.Wait()
 	if err != nil {
-		return err
+		return fmt.Errorf("wait %s", err.Error())
 	}
 
 	return nil
@@ -119,10 +149,20 @@ func NewExecJs(vm *goja.Runtime, e *Exec) *goja.Object {
 		return e.GetEnv(k)
 	})
 
-	o.Set("run", func(code string, cb CallBack) string {
-		err := e.Run(code, cb)
+	o.Set("run", func(name string, args []string, cb CallBack) string {
+		err := e.Run(name, args, cb)
 		if err != nil {
 			fmt.Println("run", err.Error())
+			return err.Error()
+		}
+
+		return ""
+	})
+
+	o.Set("runWait", func(name string, args []string, t int, cb CallBack) string {
+		err := e.RunWait(name, args, t, cb)
+		if err != nil {
+			fmt.Println("runWait err:", err.Error())
 			return err.Error()
 		}
 
