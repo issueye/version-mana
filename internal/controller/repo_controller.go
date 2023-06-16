@@ -2,14 +2,49 @@ package controller
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/issueye/version-mana/internal/global"
 	"github.com/issueye/version-mana/internal/gojs"
 	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
+	"github.com/issueye/version-mana/pkg/ws"
 )
+
+// websocket 升级并跨域
+var (
+	upgrade = &websocket.Upgrader{
+		// 允许跨域
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+)
+
+// 日志查看 ws
+func WsScriptTestRunConsole(ctx *gin.Context) {
+	control := New(ctx)
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	// 升级为 websocket
+	conn, err := upgrade.Upgrade(control.Writer, control.Request, nil)
+	if err != nil {
+		control.FailByMsgf("升级协议失败，失败原因：%s", err.Error())
+	}
+
+	fmt.Println("id => websocket", id)
+
+	ws.NewConn(id, conn)
+	control.Success()
+}
 
 type RepoController struct {
 	Controller

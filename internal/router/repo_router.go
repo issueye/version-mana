@@ -30,6 +30,7 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 		repo.GET("branch/:id", control.BranchList)
 		repo.PUT("code", control.ModifyCode)
 		repo.PUT("testRun", control.TestRun)
+		repo.GET("ws/:id", controller.WsScriptTestRunConsole)
 	}
 
 	// 版本管理

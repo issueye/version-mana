@@ -10,6 +10,7 @@ import (
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
 	"github.com/issueye/version-mana/pkg/utils"
+	"github.com/issueye/version-mana/pkg/ws"
 )
 
 func InitGojs() {
@@ -68,7 +69,7 @@ func runCompileScript(id string, args ...any) {
 	}
 
 	// 注册模块
-	InitVm(c)
+	InitVm(c, id)
 
 	err = c.RunString("test", code)
 	if err != nil {
@@ -77,7 +78,7 @@ func runCompileScript(id string, args ...any) {
 	}
 }
 
-func InitVm(c *licheeJs.Core) {
+func InitVm(c *licheeJs.Core, id string) {
 	// 运行 command 命令
 	vm := c.GetRts()
 
@@ -91,6 +92,23 @@ func InitVm(c *licheeJs.Core) {
 			return string(data)
 		}
 	})
+
+	// 回调
+	c.ConsoleCallBack = func(args ...any) {
+		if len(args) > 0 {
+			fmt.Println("id", id)
+			value, ok := ws.SMap.Load(id)
+			if ok {
+				wc := value.(*ws.WsConn)
+				data := args[0].(string)
+				err := wc.OutChanWrite([]byte(data))
+				if err != nil {
+					global.Log.Errorf("传送输出信息失败，失败原因：%s", err.Error())
+					return
+				}
+			}
+		}
+	}
 
 	c.RegisterModule("vmm/exec", func(vm *goja.Runtime, module *goja.Object) {
 		module.Set("new", func() goja.Value {
