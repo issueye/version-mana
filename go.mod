@@ -6,6 +6,7 @@ require (
 	github.com/appleboy/gin-jwt/v2 v2.9.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dimiro1/banner v1.1.0
+	github.com/dop251/goja v0.0.0-20230605162241-28ee0ee714f3
 	github.com/gin-gonic/gin v1.9.0
 	github.com/glebarez/sqlite v1.8.0
 	github.com/go-git/go-git/v5 v5.7.0
@@ -15,9 +16,10 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/issueye/lichee-js v0.0.0-20230615023500-cde5813628e7
+	github.com/issueye/lichee-js v0.0.0-20230615140827-2ba38a692678
 	github.com/mattn/go-colorable v0.1.13
 	go.uber.org/zap v1.24.0
+	golang.org/x/text v0.10.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/gorm v1.25.1
 )
@@ -35,7 +37,6 @@ require (
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
-	github.com/dop251/goja v0.0.0-20230605162241-28ee0ee714f3 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20230602164024-804a84515562 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
@@ -80,7 +81,6 @@ require (
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
