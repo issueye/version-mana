@@ -6,6 +6,9 @@ type Repository struct {
 	ServerName  string `gorm:"column:server_name;type:nvarchar(100);" json:"server_name"`   // 名称
 	RepoUrl     string `gorm:"column:repo_url;type:nvarchar(400);" json:"repo_url"`         // 代码仓库路径
 	Code        string `gorm:"column:code;type:nvarchar(8000);" json:"code"`                // 代码
+	ProxyUrl    string `gorm:"column:proxy_url;type:nvarchar(400);" json:"proxy_url"`       // 代理
+	ProxyUser   string `gorm:"column:proxy_user;type:nvarchar(100);" json:"proxy_user"`     // 代理用户名
+	ProxyPwd    string `gorm:"column:proxy_pwd;type:nvarchar(100);" json:"proxy_pwd"`       // 代理密码
 	CreateAt    string `gorm:"column:create_at;type:nvarchar(100);" json:"create_at"`       // 创建时间
 }
 
@@ -18,6 +21,9 @@ type CreateRepository struct {
 	ServerName  string `json:"server_name" binding:"required" label:"项目名称"`  // 服务名称
 	Code        string `json:"code" label:"代码"`                              // 代码
 	RepoUrl     string `json:"repo_url" binding:"required" label:"代码仓库路径"`   // 代码仓库路径
+	ProxyUrl    string `json:"proxy_url"  label:"代理地址"`                      // 代理
+	ProxyUser   string `json:"proxy_user"  label:"代理用户"`                     // 代理用户名
+	ProxyPwd    string `json:"proxy_pwd"  label:"代理密码"`                      // 代理密码
 }
 
 type ModifyRepository struct {
@@ -26,6 +32,9 @@ type ModifyRepository struct {
 	ServerName  string `json:"server_name" binding:"required" label:"项目名称"`  // 服务名称
 	Code        string `json:"code" label:"代码"`                              // 代码
 	RepoUrl     string `json:"repo_url" binding:"required" label:"代码仓库路径"`   // 代码仓库路径
+	ProxyUrl    string `json:"proxy_url"  label:"代理地址"`                      // 代理
+	ProxyUser   string `json:"proxy_user"  label:"代理用户"`                     // 代理用户名
+	ProxyPwd    string `json:"proxy_pwd"  label:"代理密码"`                      // 代理密码
 }
 
 // 查询条件

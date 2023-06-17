@@ -24,6 +24,7 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 	repo := group.Group(r.Name)
 	{
 		repo.GET("", control.List)
+		repo.GET("/:id", control.GetById)
 		repo.POST("", control.Create)
 		repo.PUT("", control.Modify)
 		repo.DELETE("/:id", control.Delete)

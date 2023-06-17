@@ -13,7 +13,7 @@ var RepoMap = new(sync.Map)
 
 // RepoClone
 // 从仓库地址拷贝指定分支到本地指定路径
-func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
+func RepoClone(path string, option *git.CloneOptions) (*git.Repository, error) {
 	value, ok := RepoMap.Load(path)
 	if ok {
 		return value.(*git.Repository), nil
@@ -31,21 +31,6 @@ func RepoClone(path string, url string, args ...any) (*git.Repository, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	// 设置配置项
-	option := &git.CloneOptions{
-		URL:               url,
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-		// ProxyOptions: transport.ProxyOptions{
-		// 	URL: "http://127.0.0.1:7890",
-		// },
-	}
-
-	// 判断是否需要指定分支
-	if len(args) > 0 {
-		branch := args[0].(string)
-		option.ReferenceName = plumbing.NewBranchReferenceName(branch)
 	}
 
 	// 克隆代码

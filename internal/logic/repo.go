@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/issueye/version-mana/internal/global"
 	"github.com/issueye/version-mana/internal/gogit"
 	"github.com/issueye/version-mana/internal/model"
@@ -85,8 +86,19 @@ func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
 	}
 
 	s := filepath.Join("runtime", "git_repo", repo.ServerName, "temp")
-	fmt.Println("path", s)
-	r, err := gogit.RepoClone(s, repo.RepoUrl, "PDJH-V2.1-DEV-001")
+
+	options := &git.CloneOptions{
+		URL:               repo.RepoUrl,
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+	}
+
+	if repo.ProxyUrl != "" {
+		options.ProxyOptions.URL = repo.ProxyUrl
+		options.ProxyOptions.Username = repo.ProxyUser
+		options.ProxyOptions.Password = repo.ProxyPwd
+	}
+
+	r, err := gogit.RepoClone(s, options)
 	if err != nil {
 		return nil, err
 	}

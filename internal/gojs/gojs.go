@@ -2,6 +2,7 @@ package gojs
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/dop251/goja"
@@ -46,13 +47,15 @@ func runCompileScript(id string, args ...any) {
 	c.SetLogPath(logDir)
 
 	// 如果是测试运行，则之传入仓库信息
-	var (
-		code string
-		err  error
-	)
 
+	var (
+		repo *model.Repository
+		vers *model.AppVersionInfo
+		err  error
+		code string
+	)
 	if len(args) > 0 {
-		_, err = injectRepoInfo(id, workDir, c)
+		repo, vers, err = injectRepoInfo(id, workDir, c)
 		if err != nil {
 			sendMessage(id, err.Error())
 			return
@@ -60,12 +63,19 @@ func runCompileScript(id string, args ...any) {
 
 		code = args[0].(string)
 	} else {
-		code, err = injectVersionInfo(id, workDir, c)
+		repo, vers, err = injectVersionInfo(id, workDir, c)
 		if err != nil {
 			sendMessage(id, err.Error())
 			return
 		}
+
+		code = repo.Code
 	}
+
+	repoDir := filepath.Join(workDir, "runtime", "git_repo", repo.ServerName, vers.AppName)
+	c.SetGlobalProperty("vers", vers)
+	c.SetGlobalProperty("repo", repo)
+	c.SetGlobalProperty("workDir", repoDir)
 
 	// 注册模块
 	InitVm(c, id)
@@ -91,41 +101,36 @@ func sendMessage(id, msg string) {
 }
 
 // 注入仓库信息
-func injectRepoInfo(id string, workDir string, c *licheeJs.Core) (string, error) {
+func injectRepoInfo(id string, workDir string, c *licheeJs.Core) (*model.Repository, *model.AppVersionInfo, error) {
 	// 获取仓库信息
 	r, err := service.NewRepo(global.DB).GetById(id)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 
-	repoDir := filepath.Join(workDir, "runtime", "git_repo", r.ServerName, "temp")
-	c.SetGlobalProperty("repoInfo", r)
-	c.SetGlobalProperty("workDir", repoDir)
+	// 随机选择当前仓库的任意版本
+	vers, err := service.NewRepo(global.DB).GetVerByRepoId(id)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	return r.Code, nil
+	return r, vers, nil
 }
 
-func injectVersionInfo(id string, workDir string, c *licheeJs.Core) (string, error) {
+func injectVersionInfo(id string, workDir string, c *licheeJs.Core) (*model.Repository, *model.AppVersionInfo, error) {
 	// 获取版本信息
 	version, err := service.NewRepo(global.DB).GetVersionById(id)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 
 	// 注入仓库信息
 	r, err := service.NewRepo(global.DB).GetById(id)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 
-	// 获取当前仓库版本的工作区
-	repoDir := filepath.Join(workDir, "runtime", "git_repo", r.ServerName, version.AppName)
-
-	c.SetGlobalProperty("versionInfo", version)
-	c.SetGlobalProperty("repoInfo", r)
-	c.SetGlobalProperty("workDir", repoDir)
-
-	return r.Code, nil
+	return r, version, nil
 }
 
 func InitVm(c *licheeJs.Core, id string) {
@@ -141,6 +146,20 @@ func InitVm(c *licheeJs.Core, id string) {
 		default:
 			return string(data)
 		}
+	})
+
+	// 文件夹不存在时创建
+	vm.Set("createNotExists", func(path string) {
+		_, err := utils.PathExists(path)
+		if err != nil {
+			sendMessage(id, fmt.Sprintf("创建文件夹失败，失败原因：%s", err.Error()))
+			return
+		}
+	})
+
+	// 文件夹存在时，删除文件夹
+	vm.Set("removeExists", func(path string) {
+		os.RemoveAll(path)
 	})
 
 	// 回调

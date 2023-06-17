@@ -31,6 +31,9 @@ func (r *Repo) Create(data *model.CreateRepository) error {
 	repo.ServerName = data.ServerName
 	repo.RepoUrl = data.RepoUrl
 	repo.Code = data.Code
+	repo.ProxyUrl = data.ProxyUrl
+	repo.ProxyUser = data.ProxyUser
+	repo.ProxyPwd = data.ProxyPwd
 	repo.CreateAt = time.Now().Format("2006-01-02 15:04:05.999")
 	return r.Db.Create(repo).Error
 }
@@ -43,6 +46,9 @@ func (r *Repo) Modify(data *model.ModifyRepository) error {
 	repo.ServerName = data.ServerName
 	repo.RepoUrl = data.RepoUrl
 	repo.Code = data.Code
+	repo.ProxyUrl = data.ProxyUrl
+	repo.ProxyUser = data.ProxyUser
+	repo.ProxyPwd = data.ProxyPwd
 	return r.Db.Model(repo).Where("id = ?", repo.ID).Updates(repo).Error
 }
 
@@ -176,15 +182,17 @@ func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, er
 
 func (r *Repo) GetLastVerNum(repoId string, req *model.QryLastVer) (*model.AppVersionInfo, error) {
 	data := new(model.AppVersionInfo)
-	// q := r.Db.
-	// 	Model(data).
-	// Where("repo_id = ?", repoId).
-	// Where("branch = ?", req.Branch).
-	// Where("tag = ?", req.Tag).
-	// 	Find(data).Order("internal_version desc")
-
 	sqlStr := `select * from app_version_info where repo_id = ? and branch = ? and tag = ? order by internal_version desc `
 	q := r.Db.Raw(sqlStr, repoId, req.Branch, req.Tag)
+	err := q.Find(data).Error
+
+	return data, err
+}
+
+func (r *Repo) GetVerByRepoId(repoId string) (*model.AppVersionInfo, error) {
+	data := new(model.AppVersionInfo)
+	sqlStr := `select * from app_version_info where repo_id = ? order by internal_version desc `
+	q := r.Db.Raw(sqlStr, repoId)
 	err := q.Find(data).Error
 
 	return data, err

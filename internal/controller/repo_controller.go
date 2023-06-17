@@ -76,6 +76,26 @@ func (RepoController) Create(ctx *gin.Context) {
 }
 
 // 查询代码仓库列表
+func (RepoController) GetById(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	data, err := service.NewRepo(global.DB).GetById(id)
+	if err != nil {
+		global.Log.Errorf("查询代码仓库信息列表失败，失败原因： %s", err.Error())
+		control.FailByMsg("查询代码仓库信息列表失败")
+		return
+	}
+
+	control.SuccessData(data)
+}
+
+// 查询代码仓库列表
 func (RepoController) List(ctx *gin.Context) {
 	control := New(ctx)
 
