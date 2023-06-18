@@ -77,6 +77,9 @@ func runCompileScript(id string, args ...any) {
 	c.SetGlobalProperty("repo", repo)
 	c.SetGlobalProperty("workDir", repoDir)
 
+	cacheDir := filepath.Join(workDir, "runtime", "git_repo", "cache")
+	c.SetGlobalProperty("cacheDir", cacheDir)
+
 	// 注册模块
 	InitVm(c, id)
 
@@ -159,7 +162,11 @@ func InitVm(c *licheeJs.Core, id string) {
 
 	// 文件夹存在时，删除文件夹
 	vm.Set("removeExists", func(path string) {
-		os.RemoveAll(path)
+		err := os.RemoveAll(path)
+		if err != nil {
+			sendMessage(id, fmt.Sprintf("删除文件夹失败，失败原因：%s", err.Error()))
+			return
+		}
 	})
 
 	// 回调
