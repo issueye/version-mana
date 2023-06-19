@@ -61,6 +61,8 @@ func (e *Exec) GetEnv(k string) string {
 }
 
 func (e *Exec) Run(name string, args []string, cb CallBack) error {
+	fmt.Println(name, args)
+
 	cmd := exec.Command(name, args...)
 
 	// 设置工作区
@@ -81,7 +83,9 @@ func (e *Exec) Run(name string, args []string, cb CallBack) error {
 
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("run %s: %s", err.Error(), stderr.String())
+		errInfo := fmt.Errorf("run %s: %s", err.Error(), stderr.String())
+		cb([]byte(errInfo.Error()))
+		return errInfo
 	}
 
 	return nil
@@ -90,8 +94,6 @@ func (e *Exec) Run(name string, args []string, cb CallBack) error {
 func (e *Exec) RunWait(name string, args []string, seconds int, cb CallBack) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(seconds))
 	defer cancel()
-	// args := strings.Split(code, " ")
-	// cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	fmt.Println("RunWait", args)
 	cmd := exec.CommandContext(ctx, name, args...)
 
@@ -109,12 +111,16 @@ func (e *Exec) RunWait(name string, args []string, seconds int, cb CallBack) err
 	// 运行
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("stdoutPipe %s", err.Error())
+		errInfo := fmt.Errorf("stdoutPipe %s", err.Error())
+		cb([]byte(errInfo.Error()))
+		return errInfo
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return fmt.Errorf("start %s", err.Error())
+		errInfo := fmt.Errorf("start %s", err.Error())
+		cb([]byte(errInfo.Error()))
+		return errInfo
 	}
 
 	in := bufio.NewScanner(stdout)
@@ -124,7 +130,9 @@ func (e *Exec) RunWait(name string, args []string, seconds int, cb CallBack) err
 
 	err = cmd.Wait()
 	if err != nil {
-		return fmt.Errorf("wait %s", err.Error())
+		errInfo := fmt.Errorf("wait %s", err.Error())
+		cb([]byte(errInfo.Error()))
+		return errInfo
 	}
 
 	return nil
@@ -166,7 +174,7 @@ func NewExecJs(vm *goja.Runtime, e *Exec) *goja.Object {
 			return err.Error()
 		}
 
-		return ""
+		return fmt.Sprintln(name, args)
 	})
 
 	return o

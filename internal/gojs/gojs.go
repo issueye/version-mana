@@ -169,6 +169,28 @@ func InitVm(c *licheeJs.Core, id string) {
 		}
 	})
 
+	// 移动文件
+	vm.Set("moveFile", func(old, new string) bool {
+		err := os.MkdirAll(filepath.Dir(new), os.ModePerm)
+		if err != nil {
+			sendMessage(id, fmt.Sprintf("移动文件失败，失败原因：%s", err.Error()))
+			return false
+		}
+
+		err = os.Rename(old, new)
+		if err != nil {
+			sendMessage(id, fmt.Sprintf("移动文件失败，失败原因：%s", err.Error()))
+			return false
+		}
+
+		return true
+	})
+
+	// 获取当前程序的根目录
+	vm.Set("rootPath", func() string {
+		return utils.GetWorkDir()
+	})
+
 	// 回调
 	c.ConsoleCallBack = func(args ...any) {
 		if len(args) > 0 {

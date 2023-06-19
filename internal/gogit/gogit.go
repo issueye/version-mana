@@ -13,8 +13,8 @@ var RepoMap = new(sync.Map)
 
 // RepoClone
 // 从仓库地址拷贝指定分支到本地指定路径
-func RepoClone(path string, option *git.CloneOptions) (*git.Repository, error) {
-	value, ok := RepoMap.Load(path)
+func RepoClone(id, path string, option *git.CloneOptions) (*git.Repository, error) {
+	value, ok := RepoMap.Load(id)
 	if ok {
 		return value.(*git.Repository), nil
 	}
@@ -40,7 +40,7 @@ func RepoClone(path string, option *git.CloneOptions) (*git.Repository, error) {
 	}
 
 	// 将对象 存入map中
-	RepoMap.Store(path, r)
+	RepoMap.Store(id, r)
 	return r, nil
 }
 
@@ -60,6 +60,11 @@ func GetBranchList(r *git.Repository) ([]*BranchInfo, error) {
 
 	list := make([]*BranchInfo, 0)
 	err = ri.ForEach(func(r *plumbing.Reference) error {
+
+		if r.Name().String() == "HEAD" {
+			return nil
+		}
+
 		branch := new(BranchInfo)
 		branch.Name = r.Name().String()
 		branch.ShortName = r.Name().Short()

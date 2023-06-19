@@ -98,9 +98,18 @@ func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
 		options.ProxyOptions.Password = repo.ProxyPwd
 	}
 
-	r, err := gogit.RepoClone(s, options)
-	if err != nil {
-		return nil, err
+	var (
+		r *git.Repository
+	)
+
+	value, ok := gogit.RepoMap.Load(repo.ID)
+	if ok {
+		r = value.(*git.Repository)
+	} else {
+		r, err = gogit.RepoClone(repo.ID, s, options)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return gogit.GetBranchList(r)
