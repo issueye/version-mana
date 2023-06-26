@@ -78,9 +78,10 @@ type CreateVersion struct {
 
 // 查询条件
 type QueryVersion struct {
-	Condition string `json:"condition" form:"condition"` // 条件
-	Tag       string `json:"tag" form:"tag"`             // tag
-	Branch    string `json:"branch" form:"branch"`       // tag
+	Condition string `json:"condition" form:"condition"`          // 条件
+	Tag       string `json:"tag" form:"tag"`                      // tag
+	Branch    string `json:"branch" form:"branch"`                // branch
+	RepoID    string `json:"repo_id" form:"repo_id" label:"仓库ID"` // 仓库id
 	Page
 }
 

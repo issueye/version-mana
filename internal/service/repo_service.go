@@ -168,6 +168,10 @@ func (r *Repo) VersionList(req *model.QueryVersion) ([]*model.AppVersionInfo, er
 			query = query.Where("branch = ?", req.Branch)
 		}
 
+		if req.RepoID != "" {
+			query = query.Where("repo_id = ?", req.RepoID)
+		}
+
 		if req.Condition != "" {
 			query = query.Where("app_name like ?", fmt.Sprintf("%%%s%%", req.Condition))
 			query = query.Where("version like ?", fmt.Sprintf("%%%s%%", req.Condition))
