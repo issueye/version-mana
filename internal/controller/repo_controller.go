@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -341,4 +343,63 @@ func (RepoController) GetVersionList(ctx *gin.Context) {
 	}
 
 	control.SuccessAutoData(req, list)
+}
+
+// 获取发布列表
+func (RepoController) GetReleaseList(ctx *gin.Context) {
+	control := New(ctx)
+
+	// 绑定参数
+	req := new(model.QueryRelease)
+	err := control.Bind(req)
+	if err != nil {
+		control.FailBind(err)
+		return
+	}
+
+	list, err := service.NewRepo(global.DB).GetReleaseList(req)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.SuccessAutoData(req, list)
+}
+
+// 移除程序
+func (RepoController) RemoveRelease(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	data, err := service.NewRepo(global.DB).GetReleaseById(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	err = service.NewRepo(global.DB).DelReleaseById(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	// 移除文件目录中的程序
+	name := data.AppName
+	if data.Platform == 0 {
+		name += ".exe"
+	}
+
+	path := filepath.Join("runtime", "static", "app", data.AppName, name)
+	err = os.Remove(path)
+	if err != nil {
+		control.FailByMsgf("移除文件失败，失败原因：%s", err.Error())
+		return
+	}
+
+	control.Success()
 }

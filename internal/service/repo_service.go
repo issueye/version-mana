@@ -201,3 +201,68 @@ func (r *Repo) GetVerByRepoId(repoId string) (*model.AppVersionInfo, error) {
 
 	return data, err
 }
+
+// 创建发布程序信息
+func (r *Repo) CreateRelease(data *model.ReleaseInfo) error {
+	return r.Db.
+		Where("repo_id = ?", data.RepoID).
+		Where("app_name = ?", data.AppName).
+		Where("branch = ?", data.Branch).
+		Where("tag = ?", data.Tag).
+		Where("platform = ?", data.Platform).
+		Save(data).
+		Error
+}
+
+// 更新发布程序下载次数
+func (r *Repo) DownCountInc(id string) error {
+	data := new(model.ReleaseInfo)
+	err := r.Db.Model(data).Where("id = ?", id).Find(data).Error
+	if err != nil {
+		return err
+	}
+
+	return r.Db.Model(&model.ReleaseInfo{}).Where("id = ?", id).Update("down_count", data.DownCount+1).Error
+}
+
+// 获取列表
+func (r *Repo) GetReleaseList(req *model.QueryRelease) ([]*model.ReleaseInfo, error) {
+	list := make([]*model.ReleaseInfo, 0)
+
+	err := r.DataFilter(model.ReleaseInfo{}.TableName(), req, &list, func(db *gorm.DB) (*gorm.DB, error) {
+		query := db.Order("internal_version desc")
+
+		if req.Tag != "" {
+			query = query.Where("tag = ?", req.Tag)
+		}
+
+		if req.Branch != "" {
+			query = query.Where("branch = ?", req.Branch)
+		}
+
+		if req.RepoID != "" {
+			query = query.Where("repo_id = ?", req.RepoID)
+		}
+
+		if req.Condition != "" {
+			query = query.Where("app_name like ?", fmt.Sprintf("%%%s%%", req.Condition))
+			query = query.Where("version like ?", fmt.Sprintf("%%%s%%", req.Condition))
+		}
+
+		return query, nil
+	})
+
+	return list, err
+}
+
+// 根据 id 删除
+func (r *Repo) DelReleaseById(id string) error {
+	return r.Db.Where("id = ?", id).Delete(&model.ReleaseInfo{}).Error
+}
+
+// 根据id 查询
+func (r *Repo) GetReleaseById(id string) (*model.ReleaseInfo, error) {
+	data := new(model.ReleaseInfo)
+	err := r.Db.Model(data).Where("id = ?", id).Find(data).Error
+	return data, err
+}

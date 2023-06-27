@@ -179,5 +179,6 @@ func initConfig() {
 		&model.User{},
 		&model.Repository{},
 		&model.AppVersionInfo{},
+		&model.ReleaseInfo{},
 	)
 }

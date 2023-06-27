@@ -8,6 +8,7 @@ import (
 	"github.com/dop251/goja"
 	licheeJs "github.com/issueye/lichee-js"
 	"github.com/issueye/version-mana/internal/global"
+	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
 	"github.com/issueye/version-mana/pkg/utils"
@@ -53,6 +54,7 @@ func runCompileScript(id string, args ...any) {
 		vers *model.AppVersionInfo
 		err  error
 		code string
+		t    int // 类型 0 测试编译 1 编译
 	)
 	if len(args) > 0 {
 		repo, vers, err = injectRepoInfo(id, workDir, c)
@@ -62,6 +64,7 @@ func runCompileScript(id string, args ...any) {
 		}
 
 		code = args[0].(string)
+		t = 0
 	} else {
 		repo, vers, err = injectVersionInfo(id, workDir, c)
 		if err != nil {
@@ -70,12 +73,14 @@ func runCompileScript(id string, args ...any) {
 		}
 
 		code = repo.Code
+		t = 1
 	}
 
 	repoDir := filepath.Join(workDir, "runtime", "git_repo", repo.ServerName, vers.AppName)
 	c.SetGlobalProperty("vers", vers)
 	c.SetGlobalProperty("repo", repo)
 	c.SetGlobalProperty("workDir", repoDir)
+	c.SetGlobalProperty("runType", t)
 
 	cacheDir := filepath.Join(workDir, "runtime", "git_repo", "cache")
 	c.SetGlobalProperty("cacheDir", cacheDir)
@@ -89,6 +94,11 @@ func runCompileScript(id string, args ...any) {
 		sendMessage(id, err.Error())
 		return
 	}
+}
+
+// 保存文件信息
+func Save(id string, t int) {
+	logic.NewRepo().CreateRelease(id, t)
 }
 
 func sendMessage(id, msg string) {
@@ -189,6 +199,10 @@ func InitVm(c *licheeJs.Core, id string) {
 	// 获取当前程序的根目录
 	vm.Set("rootPath", func() string {
 		return utils.GetWorkDir()
+	})
+
+	vm.Set("createRelease", func(id string, t int) {
+		Save(id, t)
 	})
 
 	// 回调

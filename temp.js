@@ -40,8 +40,9 @@ function cloneCode() {
   	workDir = workDir + '\\' + lichee.repo.ProjectName
     console.log('设置工作区：', workDir)
     cmd.setWorkDir(workDir)
-  
+  	
   	// 切换到指定的commit
+  	console.log(`切换到 commit => ${lichee.vers.CommitHash}`)
   	cmd.run('git', ['checkout', lichee.vers.CommitHash], function (val) {
     	let data = convToString(val, 0)
       	console.log(data)
@@ -68,12 +69,14 @@ function compile(platform) {
 	let goos = 'linux'
     let appName = `bin/${lichee.vers.AppName}`
     let name = lichee.vers.AppName
+    let t = 1
     
     if (platform == "windows") {
     	// 编译 windows
         goos = 'windows'
         appName += '.exe'
       	name += '.exe'
+      	t = 0
     }
 
     let params = [ 'build', '-o', appName, 'main.go' ]
@@ -86,6 +89,11 @@ function compile(platform) {
   	console.log(`[${platform}] =>  ${appName} 编译完成`)
   	
     moveApp(name, appName)
+  	
+  	// 保存数据
+  	if (lichee.runType == 1) {
+    	createRelease(lichee.vers.ID, t)
+    }
 }
 
 // 移动程序到下载目录
@@ -112,6 +120,10 @@ function buildApp() {
     compile('windows')
     // 编译 linux
     compile('linux')
+  
+  	console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+  	console.log('++++++++++++++++++++++++++++编译完成++++++++++++++++++++++++++++++')
+  	console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 }
 
 buildApp()

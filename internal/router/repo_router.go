@@ -44,4 +44,10 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 		version.GET("build/:id", control.Build)                  // 编译
 		version.GET("ws/:id", controller.WsScriptCompileConsole) // 编译输出监控
 	}
+
+	release := version.Group("release")
+	{
+		release.GET("", control.GetReleaseList)       // 获取发布列表
+		release.DELETE("/:id", control.RemoveRelease) // 移除发布程序
+	}
 }

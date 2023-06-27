@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/issueye/version-mana/internal/global"
 	"github.com/issueye/version-mana/internal/gogit"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
+	"github.com/issueye/version-mana/pkg/utils"
 )
 
 type RepoLogic struct{}
@@ -113,4 +115,37 @@ func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
 	}
 
 	return gogit.GetBranchList(r)
+}
+
+func (RepoLogic) CreateRelease(versionId string, t int) error {
+	avi, err := service.NewRepo(global.DB).GetVersionById(versionId)
+	if err != nil {
+		return err
+	}
+
+	down := new(model.ReleaseInfo)
+	down.ID = strconv.FormatInt(utils.GenID(), 10)
+	down.RepoID = avi.RepoID
+	down.VersionID = avi.ID
+	down.AppName = avi.AppName
+	down.Tag = avi.Tag
+	down.Version = avi.Version
+	down.InternalVersion = avi.InternalVersion
+	down.Branch = avi.Branch
+	down.CommitHash = avi.CommitHash
+
+	down.DownUrl = fmt.Sprintf("/www/app/%s/%s", avi.AppName, avi.AppName)
+	if t == 0 {
+		down.DownUrl += ".exe"
+	}
+
+	down.DownCount = 0
+	down.Platform = t
+	down.CreateAt = utils.GetNowStr()
+
+	return service.NewRepo(global.DB).CreateRelease(down)
+}
+
+func (RepoLogic) ReleaseInc(id string) error {
+	return service.NewRepo(global.DB).DownCountInc(id)
 }
