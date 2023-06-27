@@ -46,6 +46,25 @@ func WsScriptTestRunConsole(ctx *gin.Context) {
 	control.Success()
 }
 
+// 日志查看 ws
+func WsScriptCompileConsole(ctx *gin.Context) {
+	control := New(ctx)
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	// 升级为 websocket
+	conn, err := upgrade.Upgrade(control.Writer, control.Request, nil)
+	if err != nil {
+		control.FailByMsgf("升级协议失败，失败原因：%s", err.Error())
+	}
+
+	ws.NewConn(id, conn)
+	control.Success()
+}
+
 type RepoController struct {
 	Controller
 }

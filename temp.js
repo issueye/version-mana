@@ -14,7 +14,7 @@ function setEnv() {
 // 检查工作区
 function checkPath() {
     // 直接删除文件夹
-    console.log('删除文件夹：', workDir)
+    console.log('删除文件夹：', workDir) 
     removeExists(this.workDir)
     // 检查文件夹，没有则创建
     console.log('创建文件夹：', workDir)
@@ -31,29 +31,35 @@ function cloneCode() {
     let branchName = data[data.length - 1]
     console.log('branchName ', branchName)
 
-    cmd.run('git', ['clone', '-b', branchName, '-c', 'http.proxy=127.0.0.1:1080', lichee.repo.RepoUrl], function (val) {
-      let data = convToString(val, 0)
-      console.log(data)
+    cmd.run('git', ['clone', '-b', branchName, '-c', 'http.proxy=127.0.0.1:7890', lichee.repo.RepoUrl], function (val) {
+        let data = convToString(val, 0)
+        console.log(data)
     })
   
     // 设置工作区
   	workDir = workDir + '\\' + lichee.repo.ProjectName
     console.log('设置工作区：', workDir)
     cmd.setWorkDir(workDir)
+  
+  	// 切换到指定的commit
+  	cmd.run('git', ['checkout', lichee.vers.CommitHash], function (val) {
+    	let data = convToString(val, 0)
+      	console.log(data)
+    })
 }
 
 // go mod
 function goMod() {
 	console.log('拉取更新引用模块')
     cmd.runWait('go', ['mod', 'tidy'], 10, function (val) {
-      let data = convToString(val, 0)
-      console.log(data)
+        let data = convToString(val, 0)
+        console.log(data)
     })
 
     console.log('将引用模块拉取到本项目 vendor 目录')
     cmd.runWait('go', ['mod', 'vendor'], 10, function (val) {
-      let data = convToString(val, 0)
-      console.log(data)
+        let data = convToString(val, 0)
+        console.log(data)
     })
 }
 
@@ -73,21 +79,20 @@ function compile(platform) {
     let params = [ 'build', '-o', appName, 'main.go' ]
     cmd.setEnv('GOOS', goos)
     cmd.run('go', params, function (val) {
-      let data = convToString(val, 0)
-      console.log(data)
+        let data = convToString(val, 0)
+        console.log(data)
     })
   
   	console.log(`[${platform}] =>  ${appName} 编译完成`)
   	
-  	// 将程序路径返回
-  	return name
+    moveApp(name, appName)
 }
 
 // 移动程序到下载目录
-function moveApp(appName) {
+function moveApp(appName, path) {
   	let tmp = filepath.join(rootPath(), 'runtime', 'static', 'app')
 	let newPath = filepath.join(tmp, lichee.vers.AppName, appName)
-    let oldPath = filepath.join(workDir, 'bin', appName)
+    let oldPath = filepath.join(workDir, path)
     createNotExists(tmp)
     moveFile(oldPath, newPath)
   	console.log(`[${appName}]移动完成`)
@@ -104,11 +109,9 @@ function buildApp() {
     // 同步依赖
     goMod()
     // 编译 windows
-    let windowName = compile('windows')
-  	moveApp(windowName)
+    compile('windows')
     // 编译 linux
-    let linuxName = compile('linux')
-    moveApp(linuxName)
+    compile('linux')
 }
 
 buildApp()

@@ -23,15 +23,15 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 	// 仓库管理
 	repo := group.Group(r.Name)
 	{
-		repo.GET("", control.List)
-		repo.GET("/:id", control.GetById)
-		repo.POST("", control.Create)
-		repo.PUT("", control.Modify)
-		repo.DELETE("/:id", control.Delete)
-		repo.GET("branch/:id", control.BranchList)
-		repo.PUT("code", control.ModifyCode)
-		repo.PUT("testRun", control.TestRun)
-		repo.GET("ws/:id", controller.WsScriptTestRunConsole)
+		repo.GET("", control.List)                            // 列表
+		repo.GET("/:id", control.GetById)                     // 通过id 查找
+		repo.POST("", control.Create)                         // 创建
+		repo.PUT("", control.Modify)                          // 修改
+		repo.DELETE("/:id", control.Delete)                   // 删除
+		repo.GET("branch/:id", control.BranchList)            // 分支
+		repo.PUT("code", control.ModifyCode)                  // 修改代码
+		repo.PUT("testRun", control.TestRun)                  // 测试运行
+		repo.GET("ws/:id", controller.WsScriptTestRunConsole) // 测试运行输出监控
 	}
 
 	// 版本管理
@@ -42,5 +42,6 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 		version.GET("", control.GetVersionList)                  // 获取版本列表
 		version.GET("lastVerNum/:repoId", control.GetLastVerNum) // 获取最大版本号
 		version.GET("build/:id", control.Build)                  // 编译
+		version.GET("ws/:id", controller.WsScriptCompileConsole) // 编译输出监控
 	}
 }

@@ -128,7 +128,7 @@ func injectVersionInfo(id string, workDir string, c *licheeJs.Core) (*model.Repo
 	}
 
 	// 注入仓库信息
-	r, err := service.NewRepo(global.DB).GetById(id)
+	r, err := service.NewRepo(global.DB).GetById(version.RepoID)
 	if err != nil {
 		return nil, nil, err
 	}

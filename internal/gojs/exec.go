@@ -94,7 +94,7 @@ func (e *Exec) Run(name string, args []string, cb CallBack) error {
 func (e *Exec) RunWait(name string, args []string, seconds int, cb CallBack) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(seconds))
 	defer cancel()
-	fmt.Println("RunWait", args)
+	fmt.Println(name, args)
 	cmd := exec.CommandContext(ctx, name, args...)
 
 	// 设置工作区
