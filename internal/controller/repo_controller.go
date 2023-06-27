@@ -403,3 +403,34 @@ func (RepoController) RemoveRelease(ctx *gin.Context) {
 
 	control.Success()
 }
+
+func (RepoController) HandleDownloadFile(ctx *gin.Context) {
+	control := New(ctx)
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	ri, err := service.NewRepo(global.DB).GetReleaseById(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	// 更新下载次数
+	err = service.NewRepo(global.DB).DownCountInc(id)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	file := filepath.Join("runtime", "static", "app", ri.AppName, ri.AppName)
+	if ri.Platform == 0 {
+		file += ".exe"
+	}
+
+	fmt.Println("file", file)
+
+	control.File(file)
+}

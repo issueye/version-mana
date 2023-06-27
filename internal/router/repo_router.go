@@ -47,7 +47,8 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 
 	release := version.Group("release")
 	{
-		release.GET("", control.GetReleaseList)       // 获取发布列表
-		release.DELETE("/:id", control.RemoveRelease) // 移除发布程序
+		release.GET("", control.GetReleaseList)                 // 获取发布列表
+		release.DELETE("/:id", control.RemoveRelease)           // 移除发布程序
+		release.GET("download/:id", control.HandleDownloadFile) // 下载文件
 	}
 }
