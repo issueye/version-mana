@@ -15,7 +15,7 @@ function setEnv() {
 function checkPath() {
     // 直接删除文件夹
     console.log('删除文件夹：', workDir) 
-    removeExists(this.workDir)
+    removeExists(workDir)
     // 检查文件夹，没有则创建
     console.log('创建文件夹：', workDir)
     createNotExists(workDir)
