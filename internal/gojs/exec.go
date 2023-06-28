@@ -174,7 +174,7 @@ func NewExecJs(vm *goja.Runtime, e *Exec) *goja.Object {
 			return err.Error()
 		}
 
-		return fmt.Sprintln(name, args)
+		return ""
 	})
 
 	return o
