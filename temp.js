@@ -31,37 +31,53 @@ function cloneCode() {
     let branchName = data[data.length - 1]
     console.log('branchName ', branchName)
 
-    cmd.run('git', ['clone', '-b', branchName, '-c', 'http.proxy=127.0.0.1:7890', lichee.repo.RepoUrl], function (val) {
+    let runErr = cmd.run('git', ['clone', '-b', branchName, '-c', 'http.proxy=192.168.227.120:7890', lichee.repo.RepoUrl], function (val) {
         let data = convToString(val, 0)
         console.log(data)
     })
+    
+    if (runErr != '') {
+    	throw runErr;
+    }
   
     // 设置工作区
-  	workDir = workDir + '\\' + lichee.repo.ProjectName
+  	workDir = workDir + '/' + lichee.repo.ProjectName
     console.log('设置工作区：', workDir)
     cmd.setWorkDir(workDir)
   	
   	// 切换到指定的commit
   	console.log(`切换到 commit => ${lichee.vers.CommitHash}`)
-  	cmd.run('git', ['checkout', lichee.vers.CommitHash], function (val) {
+  	runErr = cmd.run('git', ['checkout', lichee.vers.CommitHash], function (val) {
     	let data = convToString(val, 0)
       	console.log(data)
     })
+  
+  	if (runErr != '') {
+    	throw runErr;
+    }
 }
 
 // go mod
 function goMod() {
 	console.log('拉取更新引用模块')
-    cmd.runWait('go', ['mod', 'tidy'], 10, function (val) {
+    let runErr = cmd.runWait('go', ['mod', 'tidy'], 10, function (val) {
         let data = convToString(val, 0)
         console.log(data)
     })
+  
+  	if (runErr != '') {
+    	throw runErr;
+    }
 
     console.log('将引用模块拉取到本项目 vendor 目录')
-    cmd.runWait('go', ['mod', 'vendor'], 10, function (val) {
+    runErr = cmd.runWait('go', ['mod', 'vendor'], 10, function (val) {
         let data = convToString(val, 0)
         console.log(data)
     })
+  
+  	if (runErr != '') {
+    	throw runErr;
+    }
 }
 
 // 编译
@@ -81,10 +97,14 @@ function compile(platform) {
 
     let params = [ 'build', '-o', appName, 'main.go' ]
     cmd.setEnv('GOOS', goos)
-    cmd.run('go', params, function (val) {
+    let runErr = cmd.run('go', params, function (val) {
         let data = convToString(val, 0)
         console.log(data)
     })
+    
+    if (runErr != '') {
+    	throw runErr;
+    }
   
   	console.log(`[${platform}] =>  ${appName} 编译完成`)
   	
