@@ -191,6 +191,25 @@ func (RepoController) Delete(ctx *gin.Context) {
 }
 
 // 获取分支列表
+func (RepoController) BranchRefresh(ctx *gin.Context) {
+	control := New(ctx)
+
+	id := control.Param("id")
+	if id == "" {
+		control.FailBind(errors.New("[id]不能为空"))
+		return
+	}
+
+	list, err := logic.NewRepo().BranchList(id, true)
+	if err != nil {
+		control.FailByMsg(err.Error())
+		return
+	}
+
+	control.SuccessData(list)
+}
+
+// 获取分支列表
 func (RepoController) BranchList(ctx *gin.Context) {
 	control := New(ctx)
 
@@ -200,7 +219,7 @@ func (RepoController) BranchList(ctx *gin.Context) {
 		return
 	}
 
-	list, err := logic.NewRepo().BranchList(id)
+	list, err := logic.NewRepo().BranchList(id, false)
 	if err != nil {
 		control.FailByMsg(err.Error())
 		return

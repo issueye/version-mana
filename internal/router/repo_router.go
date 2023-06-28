@@ -29,6 +29,7 @@ func (r RepoRouter) Register(group *gin.RouterGroup) {
 		repo.PUT("", control.Modify)                          // 修改
 		repo.DELETE("/:id", control.Delete)                   // 删除
 		repo.GET("branch/:id", control.BranchList)            // 分支
+		repo.GET("branch/refresh/:id", control.BranchRefresh) // 刷新分支
 		repo.PUT("code", control.ModifyCode)                  // 修改代码
 		repo.PUT("testRun", control.TestRun)                  // 测试运行
 		repo.GET("ws/:id", controller.WsScriptTestRunConsole) // 测试运行输出监控

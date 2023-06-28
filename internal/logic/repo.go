@@ -75,7 +75,7 @@ func (RepoLogic) RemoveVersion(id string) error {
 	return service.NewRepo(global.DB).DelVersionById(id)
 }
 
-func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
+func (RepoLogic) BranchList(id string, refresh bool) ([]*gogit.BranchInfo, error) {
 
 	// 查询仓库的地址
 	repo, err := service.NewRepo(global.DB).GetById(id)
@@ -105,7 +105,7 @@ func (RepoLogic) BranchList(id string) ([]*gogit.BranchInfo, error) {
 	)
 
 	value, ok := gogit.RepoMap.Load(repo.ID)
-	if ok {
+	if ok && !refresh {
 		r = value.(*git.Repository)
 	} else {
 		r, err = gogit.RepoClone(repo.ID, s, options)
