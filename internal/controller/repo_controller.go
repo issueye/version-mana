@@ -190,7 +190,7 @@ func (RepoController) Delete(ctx *gin.Context) {
 	control.Success()
 }
 
-// 获取分支列表
+// 刷新分支
 func (RepoController) BranchRefresh(ctx *gin.Context) {
 	control := New(ctx)
 

@@ -13,10 +13,12 @@ var RepoMap = new(sync.Map)
 
 // RepoClone
 // 从仓库地址拷贝指定分支到本地指定路径
-func RepoClone(id, path string, option *git.CloneOptions) (*git.Repository, error) {
-	value, ok := RepoMap.Load(id)
-	if ok {
-		return value.(*git.Repository), nil
+func RepoClone(id, path string, option *git.CloneOptions, refresh bool) (*git.Repository, error) {
+	if !refresh {
+		value, ok := RepoMap.Load(id)
+		if ok {
+			return value.(*git.Repository), nil
+		}
 	}
 
 	// 判断本地是否存在指定的文件夹
