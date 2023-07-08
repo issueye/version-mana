@@ -14,7 +14,7 @@ import (
 )
 
 func InitServer() {
-	mode := config.GetParam("SERVER-MODE", "debug").String()
+	mode := config.GetParam("SERVER-MODE", "release").String()
 	gin.SetMode(mode)
 	// gin引擎对象
 	global.Router = gin.New()

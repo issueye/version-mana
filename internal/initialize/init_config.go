@@ -4,7 +4,7 @@ import "github.com/issueye/version-mana/internal/config"
 
 func InitConfig() {
 	config.SetParamExist("SERVER-PORT", "10061", "端口号")
-	config.SetParamExist("SERVER-MODE", "debug", `服务运行模式， debug\release`)
+	config.SetParamExist("SERVER-MODE", "release", `服务运行模式， debug \ release`)
 
 	config.SetParamExist("LOG-MAX-SIZE", "10", "日志大小")
 	config.SetParamExist("LOG-MAX-BACKUPS", "10", "最大备份数")
