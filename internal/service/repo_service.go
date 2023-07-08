@@ -71,8 +71,10 @@ func (r *Repo) Query(req *model.QueryRepository) ([]*model.Repository, error) {
 		query := db.Order("id")
 
 		if req.Condition != "" {
-			query = query.Where("name like ?", fmt.Sprintf("%%%s%%", req.Condition))
-			query = query.Or("path like ?", fmt.Sprintf("%%%s%%", req.Condition))
+			query = query.
+				Where("project_name like ?", fmt.Sprintf("%%%s%%", req.Condition)).
+				Or("server_name like ?", fmt.Sprintf("%%%s%%", req.Condition)).
+				Or("repo_url like ?", fmt.Sprintf("%%%s%%", req.Condition))
 		}
 
 		return query, nil

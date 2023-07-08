@@ -14,6 +14,7 @@ import (
 	"github.com/issueye/version-mana/internal/logic"
 	"github.com/issueye/version-mana/internal/model"
 	"github.com/issueye/version-mana/internal/service"
+	"github.com/issueye/version-mana/pkg/utils"
 	"github.com/issueye/version-mana/pkg/ws"
 )
 
@@ -445,11 +446,17 @@ func (RepoController) HandleDownloadFile(ctx *gin.Context) {
 	}
 
 	file := filepath.Join("runtime", "static", "app", ri.AppName, ri.AppName)
+	zipName := fmt.Sprintf("%s_linux.zip", file)
 	if ri.Platform == 0 {
+		zipName = fmt.Sprintf("%s_windows.zip", file)
 		file += ".exe"
+		
 	}
 
-	fmt.Println("file", file)
+	// 对文件进行压缩
+	utils.Zip(zipName, file)
 
-	control.File(file)
+	fmt.Println("file", zipName)
+
+	control.File(zipName)
 }
