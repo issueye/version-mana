@@ -1,5 +1,6 @@
 var exec = require('vmm/exec')
 var filepath = require('std/path/filepath')
+var time = require('std/time')
 
 let cmd = exec.new()
 let workDir = lichee.workDir
@@ -99,7 +100,18 @@ function compile(platform) {
     t = 0
   }
 
-  let params = ['build', '-o', appName, 'main.go']
+  let _appName = `-X github.com/issueye/version-mana/internal/initialize.AppName=${name}`
+  let _branch = `-X github.com/issueye/version-mana/internal/initialize.Branch=${lichee.vers.Branch}`
+  let _commit = `-X github.com/issueye/version-mana/internal/initialize.Commit=${lichee.vers.CommitHash}`
+  let _date = `-X github.com/issueye/version-mana/internal/initialize.Date=${time.nowDate()}`
+  let _version = `-X github.com/issueye/version-mana/internal/initialize.Version=${lichee.vers.Version}`
+
+  let params = [
+    'build',
+    `-o=${appName}`,
+    `-ldflags=-w -s ${_appName} ${_branch} ${_commit} ${_date} ${_version}`,
+    'main.go'
+  ]
   cmd.setEnv('GOOS', goos)
   console.log(`编译[${platform}]平台程序 --> 开始`)
   let errInfo = cmd.run('go', params, function (val) {

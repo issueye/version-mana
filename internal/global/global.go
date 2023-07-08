@@ -20,7 +20,8 @@ var (
 	Stop        = make(chan struct{})
 	SwaggerJson []byte
 	Auth        *jwt.GinJWTMiddleware
-	Asset       embed.FS
+	Assets      embed.FS
+	TagName     string
 )
 
 var JobChan = make(chan *model.NoticeJob, 100)

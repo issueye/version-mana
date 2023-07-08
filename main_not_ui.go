@@ -1,3 +1,5 @@
+//go:build not_ui
+
 package main
 
 import (
@@ -19,7 +21,6 @@ import (
 
 func main() {
 	initialize.Initialize()
-
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
