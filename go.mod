@@ -4,8 +4,6 @@ go 1.19
 
 require (
 	github.com/appleboy/gin-jwt/v2 v2.9.1
-	github.com/bwmarrin/snowflake v0.3.0
-	github.com/dimiro1/banner v1.1.0
 	github.com/dop251/goja v0.0.0-20230605162241-28ee0ee714f3
 	github.com/gin-gonic/gin v1.9.0
 	github.com/glebarez/sqlite v1.8.0
@@ -17,7 +15,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/issueye/lichee-js v0.0.0-20230615140827-2ba38a692678
-	github.com/mattn/go-colorable v0.1.13
 	go.uber.org/zap v1.24.0
 	golang.org/x/text v0.10.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -34,7 +31,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
-	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20230602164024-804a84515562 // indirect

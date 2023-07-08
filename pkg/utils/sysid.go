@@ -4,16 +4,14 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/bwmarrin/snowflake"
 )
 
-var node *snowflake.Node
+var node *Node
 var lock = new(sync.Mutex)
 
 func Init(machineID int64) (err error) {
-	snowflake.Epoch = time.Now().UnixNano() / 1e6
-	node, err = snowflake.NewNode(machineID)
+	Epoch = time.Now().UnixNano() / 1e6
+	node, err = NewNode(machineID)
 	if err != nil {
 		fmt.Println(err)
 		return

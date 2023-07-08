@@ -3,10 +3,8 @@ package initialize
 import (
 	"fmt"
 
-	"github.com/dimiro1/banner"
 	"github.com/issueye/version-mana/internal/global"
 	"github.com/issueye/version-mana/internal/gojs"
-	"github.com/mattn/go-colorable"
 )
 
 func Initialize() {
@@ -38,11 +36,17 @@ var (
 
 func ShowInfo() {
 	bannerStr := `
-	
-	{{ .Title "version-mana" "" 4 }}
-	
+                                            ██                                                                          
+                                            ▀▀                                                                          
+ ██▄  ▄██   ▄████▄    ██▄████  ▄▄█████▄   ████      ▄████▄   ██▄████▄            ████▄██▄   ▄█████▄  ██▄████▄   ▄█████▄ 
+  ██  ██   ██▄▄▄▄██   ██▀      ██▄▄▄▄ ▀     ██     ██▀  ▀██  ██▀   ██            ██ ██ ██   ▀ ▄▄▄██  ██▀   ██   ▀ ▄▄▄██ 
+  ▀█▄▄█▀   ██▀▀▀▀▀▀   ██        ▀▀▀▀██▄     ██     ██    ██  ██    ██            ██ ██ ██  ▄██▀▀▀██  ██    ██  ▄██▀▀▀██ 
+   ████    ▀██▄▄▄▄█   ██       █▄▄▄▄▄██  ▄▄▄██▄▄▄  ▀██▄▄██▀  ██    ██            ██ ██ ██  ██▄▄▄███  ██    ██  ██▄▄▄███ 
+    ▀▀       ▀▀▀▀▀    ▀▀        ▀▀▀▀▀▀   ▀▀▀▀▀▀▀▀    ▀▀▀▀    ▀▀    ▀▀            ▀▀ ▀▀ ▀▀   ▀▀▀▀ ▀▀  ▀▀    ▀▀   ▀▀▀▀ ▀▀ 
+
+	版本管理 version-mana
 	`
-	banner.InitString(colorable.NewColorableStdout(), true, true, bannerStr)
+	fmt.Println(bannerStr) // mona12 风格
 
 	info := `
 	AppName: %s
