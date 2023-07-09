@@ -447,14 +447,17 @@ func (RepoController) HandleDownloadFile(ctx *gin.Context) {
 
 	file := filepath.Join("runtime", "static", "app", ri.AppName, ri.AppName)
 	zipName := fmt.Sprintf("%s_linux.zip", file)
+	readmeName := "linux_README.txt"
 	if ri.Platform == 0 {
 		zipName = fmt.Sprintf("%s_windows.zip", file)
 		file += ".exe"
-		
+		readmeName = "windows_README.txt"
 	}
 
+	readmeName = filepath.Join("runtime", "static", "app", ri.AppName, readmeName)
+
 	// 对文件进行压缩
-	utils.Zip(zipName, file)
+	utils.Zip(zipName, file, readmeName)
 
 	fmt.Println("file", zipName)
 

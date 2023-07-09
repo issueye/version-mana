@@ -1,7 +1,11 @@
 package gojs
 
 import (
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -23,6 +27,8 @@ var (
 	VersId  = make(chan string, 10)
 	RunCode = make(chan *model.RepoCode, 10)
 )
+
+type WriteFileCallBack func(*FileOperation)
 
 func gojs() {
 	for {
@@ -194,6 +200,52 @@ func InitVm(c *licheeJs.Core, id string) {
 		}
 
 		return true
+	})
+
+	vm.Set("openFile", func(path string, back WriteFileCallBack) string {
+		f2, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			return err.Error()
+		}
+		defer f2.Close()
+		fo := CreateFileOp(f2)
+		back(fo)
+		fo.Flush()
+		return ""
+	})
+
+	// md5
+	vm.Set("fileMD5", func(path string) string {
+		f, err := os.Open(path)
+		if err != nil {
+			fmt.Errorf("打开文件失败，filename=%v, err=%v", path, err)
+			return ""
+		}
+
+		defer f.Close()
+
+		md5h := md5.New()
+		io.Copy(md5h, f)
+		return hex.EncodeToString(md5h.Sum(nil))
+	})
+
+	// sha256
+	vm.Set("fileSha256", func(path string) string {
+		hash := sha256.New()
+		f, err := os.Open(path)
+		if err != nil {
+			fmt.Errorf("打开文件失败，filename=%v, err=%v", path, err)
+			return ""
+		}
+		defer f.Close()
+		if _, err := io.Copy(hash, f); err != nil {
+			fmt.Errorf("io 拷贝失败，filename=%v, err=%v", path, err)
+		}
+		bytes := hash.Sum(nil)
+		//将字符串编码为16进制格式,返回字符串
+		hashCode := hex.EncodeToString(bytes)
+		//返回哈希值
+		return hashCode
 	})
 
 	// 获取当前程序的根目录

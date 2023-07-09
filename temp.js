@@ -62,7 +62,7 @@ function cloneCode() {
 // go mod
 function goMod() {
   console.log('拉取更新引用模块 --> 开始')
-  let errInfo = cmd.runWait('go', ['mod', 'tidy'], 10, function (val) {
+  let errInfo = cmd.run('go', ['mod', 'tidy'], function (val) {
     let data = convToString(val, 0)
     console.log(data)
   })
@@ -100,17 +100,20 @@ function compile(platform) {
     t = 0
   }
 
+  let nowDate = time.nowDate()
+
   let _appName = `-X github.com/issueye/version-mana/internal/initialize.AppName=${name}`
   let _branch = `-X github.com/issueye/version-mana/internal/initialize.Branch=${lichee.vers.Branch}`
   let _commit = `-X github.com/issueye/version-mana/internal/initialize.Commit=${lichee.vers.CommitHash}`
-  let _date = `-X github.com/issueye/version-mana/internal/initialize.Date=${time.nowDate()}`
+  let _date = `-X github.com/issueye/version-mana/internal/initialize.Date=${nowDate}`
   let _version = `-X github.com/issueye/version-mana/internal/initialize.Version=${lichee.vers.Version}`
 
   let params = [
     'build',
     `-o=${appName}`,
+    '-tags=ui',
     `-ldflags=-w -s ${_appName} ${_branch} ${_commit} ${_date} ${_version}`,
-    'main.go'
+    '.'
   ]
   cmd.setEnv('GOOS', goos)
   console.log(`编译[${platform}]平台程序 --> 开始`)
@@ -124,7 +127,7 @@ function compile(platform) {
   }
 
   console.log(`编译[${platform}]平台程序 --> 编译成功 ^^^ 程序名称：${appName}`)
-  moveApp(name, appName)
+  moveApp(name, appName, platform)
 
   // 保存数据
   if (lichee.runType == 1) {
@@ -133,14 +136,34 @@ function compile(platform) {
 }
 
 // 移动程序到下载目录
-function moveApp(appName, path) {
+function moveApp(appName, path, platform) {
   let tmp = filepath.join(rootPath(), 'runtime', 'static', 'app')
   let newPath = filepath.join(tmp, lichee.vers.AppName, appName)
   let oldPath = filepath.join(workDir, path)
+  let descName = filepath.join(tmp, lichee.vers.AppName, `${platform}_README.txt`)
+
   createNotExists(tmp)
   console.log(`将编译程序[${appName}]移动到下载目录 --> 开始`)
   moveFile(oldPath, newPath)
   console.log(`将编译程序[${appName}]移动到下载目录 --> 成功`)
+
+  // 创建一个文件对象
+  openFile(descName, function (w) {
+    w.WriteString(`程序名称：${appName}`)
+    w.WriteString(`程序版本：${lichee.vers.Version}`)
+    w.WriteString(`最后HASH：${lichee.vers.CommitHash}`)
+    w.WriteString(`编译日期：${time.nowDate()}`)
+    w.WriteString(`编译分支：${lichee.vers.Branch}`)
+
+    let md5 = fileMD5(newPath)
+    w.WriteString(`MD5：${md5}`)
+
+    let sha256 = fileSha256(newPath)
+    w.WriteString(`SHA256:${sha256}`)
+
+    w.WriteString(`更新内容：`)
+    w.WriteString(lichee.vers.Content)
+  })
 }
 
 // 运行
